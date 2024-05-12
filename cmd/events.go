@@ -21,7 +21,7 @@ func newEventManager(app *App) *EventManger {
 	app.logger.Info().Msg("Initialising Events Manager")
 	ctx, cancel := context.WithCancel(app.ctx)
 	broker := make(chan models.Event)
-	consumer := consumers.New(broker, app.logger, ctx, app.storage)
+	consumer := consumers.New(ctx, broker, app.logger, app.storage)
 	producer := producers.New(ctx, broker, app.logger, app.symbols)
 	return &EventManger{consumer, producer, broker, ctx, cancel, app.logger}
 }

@@ -42,7 +42,7 @@ func (t *TradeProducer) Produce() bool {
 				Timestamp: now,
 			}
 			event := models.Event{ID: id, Timestamp: now, Payload: trade, Type: "trade"}
-			t.base.Produce(event)
+			go t.base.Produce(event)
 			time.Sleep(1000 * time.Millisecond)
 		}
 	}

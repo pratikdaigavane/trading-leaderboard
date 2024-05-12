@@ -19,7 +19,7 @@ type EventConsumer interface {
 	Consume(interface{}) bool
 }
 
-func New(broker chan models.Event, logger *zerolog.Logger, ctx context.Context, storage *storage.Storage) *Consumer {
+func New(ctx context.Context, broker chan models.Event, logger *zerolog.Logger, storage *storage.Storage) *Consumer {
 	c := &Consumer{broker: broker, logger: logger, ctx: ctx, storage: storage}
 	c.registerEvents()
 	return c
@@ -40,6 +40,7 @@ func (c *Consumer) Start() {
 			case event := <-c.broker:
 				c.logger.Info().Interface("event", event).Msg("Event Consumed")
 				if val, ok := c.events[event.Type]; ok {
+					// pool go routines to handle the event https://github.com/panjf2000/ants
 					val.Consume(event.Payload)
 				} else {
 					c.logger.Warn().Str("event_type", event.Type).Interface("event", event).Msg("Unknown Event Type")

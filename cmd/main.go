@@ -12,49 +12,46 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 )
 
+// App contains the "global" components that are passed around
 type App struct {
 	ctx     context.Context
-	signal  chan os.Signal
 	logger  *zerolog.Logger
 	config  *config.Manager
 	storage *storage.Storage
 	symbols *symbols.Manager
 	events  *EventManger
+
+	// Channel for passing reload signals.
+	signal chan os.Signal
 }
 
+var (
+	logger = initLogger()
+	conf   *config.Manager
+)
+
 func main() {
-	time.Local = time.UTC
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
+	conf = config.New(logger)
 	app := App{
-		logger: initLogger(),
-		ctx:    context.Background(),
+		logger:  logger,
+		ctx:     context.Background(),
+		config:  conf,
+		storage: storage.New(logger, conf),
+		symbols: symbols.New(logger, conf),
 	}
-	app.config = config.New(app.logger)
 	app.logger.Info().Str("Version", app.config.GetServiceConfig().Version).Msg("Starting application")
-	app.storage = storage.New(app.logger, app.config)
-	app.symbols = symbols.New(app.logger, app.config)
 	app.events = newEventManager(&app)
 	app.events.start()
-	/*trade := models.Trade{
-		Symbol:   "AAPL",
-		Quantity: 100,
-		TraderId: "dfdsfdsfsd",
-		ID:       "sdfdfsdf",
-	}
-	err = app.storage.Operations.Add(&trade)
-	if err != nil {
-		app.logger.Error().Err(err).Stack().Msg("Failed to add trade")
-		return
-	}
-	stats, _ := app.storage.Operations.GetSortedList("AdAPL", 10)
-	app.logger.Info().Interface("stats", stats).Msg("Stats")*/
 	server := rest.StartServer(app.logger, app.config, app.storage, app.symbols)
+
+	// Wait for the interrupt or sigterm signal to gracefully shut down resources
+	// within N seconds, or do a force shutdown.
 	app.signal = make(chan os.Signal, 2)
 	signal.Notify(app.signal, os.Interrupt, syscall.SIGTERM)
 	for {
