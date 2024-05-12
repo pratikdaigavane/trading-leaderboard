@@ -1,6 +1,8 @@
 package buffer
 
 import (
+	"context"
+	"github.com/rs/zerolog"
 	"sync"
 	"time"
 )
@@ -15,16 +17,22 @@ type Buffer struct {
 	lock        sync.Mutex
 	funcOnFlush func()
 	maxDuration time.Duration
+	ctx         context.Context
+	logger      *zerolog.Logger
+	name        string
 }
 
-func NewBuffer(value float64, size int64, funcOnFlush func()) *Buffer {
+func NewBuffer(ctx context.Context, logger *zerolog.Logger, name string, value float64, size int64, funcOnFlush func()) *Buffer {
 	buf := &Buffer{
+		ctx:         ctx,
 		value:       value,
+		name:        name,
 		currSize:    size,
 		lastFlushed: time.Now(),
 		funcOnFlush: funcOnFlush,
 		maxSize:     10,
 		maxDuration: 5 * time.Second,
+		logger:      logger,
 	}
 	go buf.startFlushTicker()
 	return buf
@@ -53,8 +61,12 @@ func (b *Buffer) flush() {
 // startFlushTicker starts a ticker to flush the buffer after certain time interval
 func (b *Buffer) startFlushTicker() {
 	t := time.NewTicker(1 * time.Second)
+	defer t.Stop()
 	for {
 		select {
+		case <-b.ctx.Done():
+			b.logger.Info().Str("name", b.name).Msg("Shutting down the buffer ticker")
+			return
 		case <-t.C:
 			b.lock.Lock()
 			if time.Since(b.lastFlushed) >= b.maxDuration && b.currSize > 0 {
