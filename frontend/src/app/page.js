@@ -8,7 +8,7 @@ import Leaderboard from "@/components/leaderboard";
 
 
 async function fetchSymbolsList() {
-    const res = await fetch('http://localhost:8080/symbols')
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/symbols`)
     if (res.status === 200) {
         const json = await res.json()
         console.log(json)

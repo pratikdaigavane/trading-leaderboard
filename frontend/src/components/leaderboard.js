@@ -40,7 +40,7 @@ export default function Leaderboard() {
         if (counter === 60) {
             setLoading(true)
         }
-        const res = await fetch(`http://127.0.0.1:8080/leaderboard/${symbol}`)
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/leaderboard/${symbol}`)
         if (res.status === 200) {
             const json = await res.json()
             console.log(json)
