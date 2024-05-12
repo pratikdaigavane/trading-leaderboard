@@ -14,6 +14,7 @@ type Buffer struct {
 	lastFlushed time.Time
 	lock        sync.Mutex
 	funcOnFlush func()
+	maxDuration time.Duration
 }
 
 func NewBuffer(value float64, size int64, funcOnFlush func()) *Buffer {
@@ -23,6 +24,7 @@ func NewBuffer(value float64, size int64, funcOnFlush func()) *Buffer {
 		lastFlushed: time.Now(),
 		funcOnFlush: funcOnFlush,
 		maxSize:     10,
+		maxDuration: 5 * time.Second,
 	}
 }
 
@@ -33,7 +35,7 @@ func (b *Buffer) Add(value float64) {
 	b.value += value
 	b.currSize++
 
-	if b.currSize >= b.maxSize || time.Since(b.lastFlushed) > 5*time.Second {
+	if b.currSize >= b.maxSize || time.Since(b.lastFlushed) >= b.maxDuration {
 		b.flush()
 	}
 }
@@ -53,7 +55,7 @@ func (b *Buffer) startFlushTicker() {
 		select {
 		case <-t.C:
 			b.lock.Lock()
-			if time.Since(b.lastFlushed) > 5*time.Second {
+			if time.Since(b.lastFlushed) >= b.maxDuration {
 				b.flush()
 			}
 			b.lock.Unlock()
