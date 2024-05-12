@@ -57,7 +57,7 @@ func (b *Buffer) startFlushTicker() {
 		select {
 		case <-t.C:
 			b.lock.Lock()
-			if time.Since(b.lastFlushed) >= b.maxDuration {
+			if time.Since(b.lastFlushed) >= b.maxDuration && b.currSize > 0 {
 				b.flush()
 			}
 			b.lock.Unlock()
