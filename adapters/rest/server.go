@@ -9,7 +9,7 @@ import (
 	"leaderboard/adapters/rest/handlers"
 	"leaderboard/adapters/rest/middleware"
 	"leaderboard/internal/config"
-	"leaderboard/internal/storage"
+	"leaderboard/internal/manager"
 	"leaderboard/internal/symbols"
 	"net/http"
 	"time"
@@ -20,7 +20,7 @@ type Server struct {
 	logger *zerolog.Logger
 }
 
-func StartServer(log *zerolog.Logger, config *config.Manager, storage *storage.Storage, symbols *symbols.Manager) *Server {
+func StartServer(log *zerolog.Logger, config *config.Manager, manager *manager.Manager, symbols *symbols.Manager) *Server {
 	r := gin.New()
 	r.Use(middleware.StructuredLogger(log), gin.Recovery())
 	r.Use(cors.New(cors.Config{
@@ -28,7 +28,7 @@ func StartServer(log *zerolog.Logger, config *config.Manager, storage *storage.S
 		AllowMethods:     []string{"GET"},
 		AllowCredentials: true,
 	}))
-	handlers.SetupHandlers(r, log, config, storage, symbols)
+	handlers.SetupHandlers(r, log, config, symbols, manager)
 	srv := &http.Server{
 		Addr:    ":8080",
 		Handler: r.Handler(),

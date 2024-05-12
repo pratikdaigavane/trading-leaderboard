@@ -23,10 +23,14 @@ type EventProducer interface {
 func New(ctx context.Context, broker chan models.Event, logger *zerolog.Logger, symbols *symbols.Manager) *Producer {
 	base := &Producer{ctx: ctx, broker: broker, logger: logger, symbols: symbols}
 	base.registerEventProducers()
-	for _, producer := range base.producers {
+	return base
+}
+
+func (p *Producer) Start() {
+	p.logger.Info().Msg("Starting Event Producers")
+	for _, producer := range p.producers {
 		producer.Start()
 	}
-	return base
 }
 
 func (p *Producer) registerEventProducers() {

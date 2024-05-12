@@ -9,7 +9,7 @@ type TradeConsumer struct {
 func (t *TradeConsumer) Consume(payload interface{}) bool {
 	trade := payload.(models.Trade)
 	t.base.logger.Info().Interface("trade", trade).Msg("Trade Consumed")
-	err := t.base.storage.Operations.Add(&trade)
+	err := t.base.manager.AddTrade(&trade)
 	if err != nil {
 		t.base.logger.Error().Err(err).Stack().Msg("Failed to add trade")
 		return false

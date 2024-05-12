@@ -30,23 +30,37 @@ func NewRedisOperations(config *config.Manager, logger *zerolog.Logger) *RedisOp
 	}
 }
 
-func (r *RedisOperations) Add(trade *models.Trade) error {
-	err := r.client.ZIncrBy(ctx, getLeaderboardKey(trade.Symbol), trade.Quantity, trade.TraderId).Err()
+func (r *RedisOperations) Add(pipe redis.Pipeliner, trade *models.Trade) error {
+	err := pipe.ZIncrBy(ctx, getLeaderboardKey(trade.Symbol), trade.Quantity, trade.TraderId).Err()
 	if err != nil {
 		r.logger.Error().Err(err).Interface("obj", trade).Stack().Msg("Failed to add trade to redis")
 		return err
 	}
 	err = failsafe.Run(func() error {
-		r.expire(trade.Symbol)
+		r.expire(pipe, trade.Symbol)
 		return nil
 	}, r.getOrSetLimiter(trade.Symbol))
-	r.logger.Info().Interface("obj", trade).Msg("Trade added to Redis")
 	return nil
 }
 
-func (r *RedisOperations) expire(symbol string) {
+func (r *RedisOperations) BatchAdd(trades []*models.Trade) error {
+	r.logger.Info().Interface("trades", trades).Msg("Adding trades to Redis in batch")
+	_, err := r.client.TxPipelined(ctx, func(pipe redis.Pipeliner) error {
+		for _, trade := range trades {
+			_ = r.Add(pipe, trade)
+		}
+		return nil
+	})
+	if err != nil {
+		r.logger.Error().Err(err).Interface("trades", trades).Stack().Msg("Failed to add trade to redis")
+		return err
+	}
+	return nil
+}
+
+func (r *RedisOperations) expire(pipe redis.Pipeliner, symbol string) {
 	r.logger.Error().Msg("Setting Leaderboard Expiry")
-	r.client.ExpireAt(ctx, getLeaderboardKey(symbol), getExpiryTime())
+	pipe.ExpireAt(ctx, getLeaderboardKey(symbol), getExpiryTime())
 }
 
 func (r *RedisOperations) getOrSetLimiter(symbol string) ratelimiter.RateLimiter[any] {

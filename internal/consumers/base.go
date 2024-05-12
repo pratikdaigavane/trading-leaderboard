@@ -3,7 +3,7 @@ package consumers
 import (
 	"context"
 	"github.com/rs/zerolog"
-	"leaderboard/internal/storage"
+	"leaderboard/internal/manager"
 	"leaderboard/models"
 )
 
@@ -12,15 +12,15 @@ type Consumer struct {
 	logger  *zerolog.Logger
 	ctx     context.Context
 	events  map[string]EventConsumer
-	storage *storage.Storage
+	manager *manager.Manager
 }
 
 type EventConsumer interface {
 	Consume(interface{}) bool
 }
 
-func New(ctx context.Context, broker chan models.Event, logger *zerolog.Logger, storage *storage.Storage) *Consumer {
-	c := &Consumer{broker: broker, logger: logger, ctx: ctx, storage: storage}
+func New(ctx context.Context, broker chan models.Event, logger *zerolog.Logger, manager *manager.Manager) *Consumer {
+	c := &Consumer{broker: broker, logger: logger, ctx: ctx, manager: manager}
 	c.registerEvents()
 	return c
 }

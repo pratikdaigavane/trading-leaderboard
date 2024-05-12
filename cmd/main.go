@@ -6,6 +6,7 @@ import (
 	"github.com/rs/zerolog"
 	"leaderboard/adapters/rest"
 	"leaderboard/internal/config"
+	"leaderboard/internal/manager"
 	"leaderboard/internal/storage"
 	"leaderboard/internal/symbols"
 	"log"
@@ -22,7 +23,7 @@ type App struct {
 	storage *storage.Storage
 	symbols *symbols.Manager
 	events  *EventManger
-
+	manager *manager.Manager
 	// Channel for passing reload signals.
 	signal chan os.Signal
 }
@@ -46,9 +47,10 @@ func main() {
 		symbols: symbols.New(logger, conf),
 	}
 	app.logger.Info().Str("Version", app.config.GetServiceConfig().Version).Msg("Starting application")
+	app.manager = manager.New(app.ctx, app.logger, app.symbols, app.storage)
 	app.events = newEventManager(&app)
 	app.events.start()
-	server := rest.StartServer(app.logger, app.config, app.storage, app.symbols)
+	server := rest.StartServer(app.logger, app.config, app.manager, app.symbols)
 
 	// Wait for the interrupt or sigterm signal to gracefully shut down resources
 	// within N seconds, or do a force shutdown.
@@ -58,6 +60,7 @@ func main() {
 		sig := <-app.signal
 		app.logger.Info().Str("signal", sig.String()).Msg("Received Signal to Shutdown")
 		app.events.shutdown()
+		app.manager.Shutdown()
 		server.Shutdown(app.ctx)
 		return
 	}
