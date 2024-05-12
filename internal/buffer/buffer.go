@@ -18,7 +18,7 @@ type Buffer struct {
 }
 
 func NewBuffer(value float64, size int64, funcOnFlush func()) *Buffer {
-	return &Buffer{
+	buf := &Buffer{
 		value:       value,
 		currSize:    size,
 		lastFlushed: time.Now(),
@@ -26,6 +26,8 @@ func NewBuffer(value float64, size int64, funcOnFlush func()) *Buffer {
 		maxSize:     10,
 		maxDuration: 5 * time.Second,
 	}
+	buf.startFlushTicker()
+	return buf
 }
 
 // Add adds the value to the buffer and flushes the buffer if the buffer is full or after certain time interval
