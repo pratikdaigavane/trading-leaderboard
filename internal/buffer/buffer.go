@@ -26,7 +26,7 @@ func NewBuffer(value float64, size int64, funcOnFlush func()) *Buffer {
 		maxSize:     10,
 		maxDuration: 5 * time.Second,
 	}
-	buf.startFlushTicker()
+	go buf.startFlushTicker()
 	return buf
 }
 
