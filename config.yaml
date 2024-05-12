@@ -1,0 +1,13 @@
+#Buisness Configurations
+leaderboardDepth: 10
+symbols:
+  bitcoin:
+    name: Bitcoin
+    id: bitcoin
+    symbol: BTC
+    imagePath: https://cdn.pratikd.in/symbols/btc.png
+  ethereum:
+    name: Ethereum
+    id: ethereum
+    symbol: ETH
+    imagePath: https://cdn.pratikd.in/symbols/eth.png
