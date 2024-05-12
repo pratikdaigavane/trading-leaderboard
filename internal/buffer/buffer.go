@@ -45,3 +45,18 @@ func (b *Buffer) flush() {
 	b.currSize = 0
 	b.lastFlushed = time.Now()
 }
+
+// startFlushTicker starts a ticker to flush the buffer after certain time interval
+func (b *Buffer) startFlushTicker() {
+	t := time.NewTicker(1 * time.Second)
+	for {
+		select {
+		case <-t.C:
+			b.lock.Lock()
+			if time.Since(b.lastFlushed) > 5*time.Second {
+				b.flush()
+			}
+			b.lock.Unlock()
+		}
+	}
+}
