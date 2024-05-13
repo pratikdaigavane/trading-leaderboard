@@ -6,7 +6,7 @@ import Image from "next/image";
 import {useEffect, useRef, useState} from "react";
 import {useToast} from "@/components/ui/use-toast"
 import {Skeleton} from "@/components/ui/skeleton";
-import {symbolImageInstance, symbolInstance, symbolNameInstance} from "@/app/store";
+import {symbolCodeInstance, symbolImageInstance, symbolInstance, symbolNameInstance} from "@/app/store";
 import {useAtom} from "jotai";
 
 function useInterval(callback, delay) {
@@ -31,6 +31,7 @@ export default function Leaderboard() {
     const [symbol, setSymbol] = useAtom(symbolInstance);
     const [symbolName, setSymbolName] = useAtom(symbolNameInstance);
     const [symbolImage, setSymbolImage] = useAtom(symbolImageInstance);
+    const [symbolCode, setSymbolCode] = useAtom(symbolCodeInstance);
     const [leaderboard, setLeaderboard] = useState([])
     const [counter, setCounter] = useState(60)
     const {toast} = useToast()
@@ -43,7 +44,6 @@ export default function Leaderboard() {
         const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/leaderboard/${symbol}`)
         if (res.status === 200) {
             const json = await res.json()
-            console.log(json)
             setLeaderboard(json)
             setLoading(false)
             return json
@@ -51,13 +51,11 @@ export default function Leaderboard() {
     }
 
     useEffect(() => {
-            console.log("fetching leaderboard", symbol)
             fetchLeaderboard()
         },
         [symbol])
     useInterval(() => {
             setCounter(counter - 1)
-            console.log("sdfsdf", counter)
             if (counter === 0) {
                 fetchLeaderboard()
                 setCounter(60)
@@ -68,16 +66,9 @@ export default function Leaderboard() {
                 fetchLeaderboard()
             } else {
                 setCounter(counter - 1)
-                console.log("counter is", counter - 1, " symbol is ", symbol )
             }
         },
         1000);
-
-
-    // useEffect(() => {
-    //     setInterval(
-    //     }, 1000)
-    // }, []);
 
     return (
         <Card>
@@ -92,7 +83,7 @@ export default function Leaderboard() {
                             width="64"
                         />
                         <div className="flex-col space-y-2">
-                            <div> {symbolName}</div>
+                            <div> {symbolName} ({symbolCode})</div>
                             <CardDescription>
                                 A list of top 10 traders in the last 24 hours
                             </CardDescription>

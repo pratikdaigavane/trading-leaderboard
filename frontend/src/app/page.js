@@ -11,7 +11,6 @@ async function fetchSymbolsList() {
     const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/symbols`)
     if (res.status === 200) {
         const json = await res.json()
-        console.log(json)
         return json
     }
 }
@@ -29,15 +28,12 @@ export default async function Home() {
                 <ThemeToggle/>
             </header>
             <div className="mt-8 md:mx-24" >
-                <Tabs defaultValue="Bitcoin">
                     <div className="flex items-center gap-4">
                         <CommandMenu dbList={symbolsList}></CommandMenu>
                     </div>
                     <div className="mt-4">
                         <Leaderboard></Leaderboard>
                     </div>
-                </Tabs>
-
             </div>
             <div className="mt-4 pb-3 flex items-center justify-center text-muted-foreground text-sm">
                 Made with ❤️ by <div>&nbsp;</div>  <a href="https://www.linkedin.com/in/pratikdaigavane/" target="_blank"> Pratik Daigavane</a>

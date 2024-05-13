@@ -24,13 +24,14 @@ import {Button} from "@/components/ui/button";
 import { ChevronDown } from "lucide-react"
 import Image from "next/image";
 import {useAtom} from "jotai";
-import {symbolImageInstance, symbolInstance, symbolNameInstance} from "@/app/store";
+import {symbolCodeInstance, symbolImageInstance, symbolInstance, symbolNameInstance} from "@/app/store";
 
 export default function CommandMenu({dbList}) {
     const [open, setOpen] = useState(false)
     const [symbol, setSymbol] = useAtom(symbolInstance);
     const [symbolName, setSymbolName] = useAtom(symbolNameInstance);
     const [symbolImage, setSymbolImage] = useAtom(symbolImageInstance);
+    const [symbolCode, setSymbolCode] = useAtom(symbolCodeInstance);
 
     useEffect(() => {
         const down = (e) => {
@@ -49,6 +50,7 @@ export default function CommandMenu({dbList}) {
         setSymbol(value.id)
         setSymbolName(value.name)
         setSymbolImage(value.imagePath)
+        setSymbolCode(value.symbol)
         setOpen(false)
     }
 

@@ -11,3 +11,18 @@ symbols:
     id: ethereum
     symbol: ETH
     imagePath: https://cdn.pratikd.in/symbols/eth.png
+  solana:
+    name: Solana
+    id: solana
+    symbol: SOL
+    imagePath: https://cdn.pratikd.in/symbols/solana.png
+  usdc:
+    name: USDC
+    id: usdc
+    symbol: USDC
+    imagePath: https://cdn.pratikd.in/symbols/usdc.png
+  artbitrum:
+    name: Arbitrum
+    id: arbitrum
+    symbol: ARB
+    imagePath: https://cdn.pratikd.in/symbols/artbitrum.png
