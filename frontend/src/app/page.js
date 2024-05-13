@@ -5,6 +5,7 @@ import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/c
 import Image from "next/image";
 import CommandMenu from "@/components/command-bar";
 import Leaderboard from "@/components/leaderboard";
+import Link from "next/link";
 
 
 async function fetchSymbolsList() {
@@ -25,11 +26,17 @@ export default async function Home() {
                     <h3 className="text-l text-muted-foreground pt-2">Here is the leaderboard of your favourite
                         token </h3>
                 </div>
-                <ThemeToggle/>
+                <div className="flex items-center gap-4">
+                    <div>
+                        <a href={`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/swagger/index.html`} className="" target="_blank">API Docs</a>
+                    </div>
+                    <ThemeToggle/>
+                </div>
+
             </header>
-            <div className="mt-8 md:mx-24" >
-                    <div className="flex items-center gap-4">
-                        <CommandMenu dbList={symbolsList}></CommandMenu>
+            <div className="mt-8 md:mx-24">
+                <div className="flex items-center gap-4">
+                    <CommandMenu dbList={symbolsList}></CommandMenu>
                     </div>
                     <div className="mt-4">
                         <Leaderboard></Leaderboard>
