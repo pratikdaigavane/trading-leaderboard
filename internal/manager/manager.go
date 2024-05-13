@@ -7,6 +7,7 @@ import (
 	"leaderboard/internal/storage"
 	"leaderboard/internal/symbols"
 	"leaderboard/models"
+	"time"
 )
 
 // Manager is used to manage the leaderboard and is the core component of the leaderboard system
@@ -26,7 +27,7 @@ func New(ctx context.Context, logger *zerolog.Logger, symbols *symbols.Manager, 
 	symbolsList := symbols.GetSymbols()
 	for symbol := range *symbolsList {
 		logger.Info().Str("symbol", symbol).Msg("Creating Buffer")
-		buf[symbol] = buffer.NewBuffer(ctx, logger, symbol, storage.Operations.BatchAdd)
+		buf[symbol] = buffer.NewBuffer(ctx, logger, symbol, 10, 5*time.Second, storage.Operations.BatchAdd)
 	}
 	return &Manager{ctx: ctx, buffer: buf, logger: logger, cancel: cancel, storage: storage}
 }

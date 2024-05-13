@@ -12,7 +12,7 @@ import (
 // buffer is full or after certain time interval
 type Buffer struct {
 	store       []*models.Trade
-	currSize    int64
+	CurrSize    int64
 	maxSize     int64
 	lastFlushed time.Time
 	lock        sync.Mutex
@@ -23,9 +23,7 @@ type Buffer struct {
 	name        string
 }
 
-var maxCapacity int64 = 10
-
-func NewBuffer(ctx context.Context, logger *zerolog.Logger, name string, funcOnFlush func(trade []*models.Trade) error) *Buffer {
+func NewBuffer(ctx context.Context, logger *zerolog.Logger, name string, maxCapacity int64, maxDuration time.Duration, funcOnFlush func(trade []*models.Trade) error) *Buffer {
 	buf := &Buffer{
 		ctx:         ctx,
 		store:       []*models.Trade{},
@@ -33,7 +31,7 @@ func NewBuffer(ctx context.Context, logger *zerolog.Logger, name string, funcOnF
 		lastFlushed: time.Now(),
 		funcOnFlush: funcOnFlush,
 		maxSize:     maxCapacity,
-		maxDuration: 5 * time.Second,
+		maxDuration: maxDuration,
 		logger:      logger,
 	}
 	go buf.startFlushTicker()
@@ -45,8 +43,8 @@ func (b *Buffer) Add(trade *models.Trade) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 	b.store = append(b.store, trade)
-	b.currSize++
-	if b.currSize >= b.maxSize || time.Since(b.lastFlushed) >= b.maxDuration {
+	b.CurrSize++
+	if b.CurrSize >= b.maxSize || time.Since(b.lastFlushed) >= b.maxDuration {
 		err := b.flush()
 		if err != nil {
 			return err
@@ -65,7 +63,7 @@ func (b *Buffer) flush() error {
 			return err
 		}
 	}
-	b.currSize = 0
+	b.CurrSize = 0
 	b.store = []*models.Trade{}
 	b.lastFlushed = time.Now()
 	return nil
@@ -88,12 +86,12 @@ func (b *Buffer) startFlushTicker() {
 		case <-t.C:
 			b.logger.Debug().
 				Str("name", b.name).
-				Int64("size", b.currSize).
+				Int64("size", b.CurrSize).
 				Time("lastFlushed", b.lastFlushed).
 				Interface("store", b.store).
 				Msg("Checking buffer if buffer is full")
 			b.lock.Lock()
-			if time.Since(b.lastFlushed) >= b.maxDuration && b.currSize > 0 {
+			if time.Since(b.lastFlushed) >= b.maxDuration && b.CurrSize > 0 {
 				b.flush()
 			}
 			b.lock.Unlock()
