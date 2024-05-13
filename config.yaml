@@ -21,7 +21,7 @@ symbols:
     id: usdc
     symbol: USDC
     imagePath: https://cdn.pratikd.in/symbols/usdc.png
-  artbitrum:
+  arbitrum:
     name: Arbitrum
     id: arbitrum
     symbol: ARB
