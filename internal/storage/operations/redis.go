@@ -7,6 +7,7 @@ import (
 	"github.com/rs/zerolog"
 	"leaderboard/internal/config"
 	"leaderboard/models"
+	"sync"
 	"time"
 )
 import "github.com/redis/go-redis/v9"
@@ -18,6 +19,7 @@ type RedisOperations struct {
 	client   *redis.Client
 	logger   *zerolog.Logger
 	limiters map[string]ratelimiter.RateLimiter[any]
+	lock     sync.Mutex
 }
 
 // NewRedisOperations creates a new RedisOperations and initializes the Redis client
@@ -79,6 +81,8 @@ func (r *RedisOperations) getOrSetLimiter(symbol string) ratelimiter.RateLimiter
 	if limiter, ok := r.limiters[symbol]; ok {
 		return limiter
 	}
+	r.lock.Lock()
+	defer r.lock.Unlock()
 	r.logger.Info().Str("symbol", symbol).Msg("Creating new rate limiter")
 	// Create a new rate limiter with a burst of 1 and a rate of 1 per minute, the rate can be adjusted as needed
 	r.limiters[symbol] = ratelimiter.Bursty[any](1, 1*time.Minute).Build()

@@ -9,6 +9,7 @@ import (
 
 // initLogger initializes the logger to log a human-friendly, colorized output.
 func initLogger() *zerolog.Logger {
+	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
