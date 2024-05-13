@@ -26,6 +26,7 @@ func NewRedisOperations(config *config.Manager, logger *zerolog.Logger) *RedisOp
 		client: redis.NewClient(&redis.Options{
 			Addr:     config.GetServiceConfig().RedisAddr,
 			Password: "",
+			DB:       config.GetServiceConfig().RedisDB,
 		}),
 		logger:   logger,
 		limiters: make(map[string]ratelimiter.RateLimiter[any]),
@@ -101,6 +102,12 @@ func (r *RedisOperations) GetSortedList(symbol string, depth int) (*[]models.Use
 		}
 	}
 	return &stats, nil
+}
+
+func (r *RedisOperations) FlushDB() error {
+	r.logger.Warn().Msg("Flushing Redis DB")
+	r.client.FlushDB(ctx)
+	return nil
 }
 
 // getLeaderboardKey returns the key for the leaderboard in Redis that is used to store the leaderboard for the given symbol

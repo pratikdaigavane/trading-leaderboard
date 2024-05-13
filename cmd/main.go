@@ -40,7 +40,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-	conf = config.New(logger)
+	conf = config.New(logger, "config.yaml")
 	app := App{
 		logger:  logger,
 		ctx:     context.Background(),

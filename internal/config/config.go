@@ -12,6 +12,7 @@ type ServiceConfig struct {
 	RedisAddr      string `env:"REDIS_ADDRESS" envDefault:"127.0.0.1"`
 	Version        string `env:"VERSION" envDefault:"1.0.0"`
 	HttpServerAddr string `env:"HTTP_SERVER_ADDRESS" envDefault:":8080"`
+	RedisDB        int    `env:"REDIS_DB" envDefault:"0"`
 }
 
 type Config struct {
@@ -29,7 +30,7 @@ type Manager struct {
 }
 
 // New creates a new Manager and loads the configuration from the environment variables and the config.yaml file.
-func New(log *zerolog.Logger) *Manager {
+func New(log *zerolog.Logger, configPath string) *Manager {
 	log.Info().Msg("Config Manager - Parsing Environment Variables")
 	serviceCfg := ServiceConfig{}
 	if err := env.Parse(&serviceCfg); err != nil {
@@ -38,7 +39,7 @@ func New(log *zerolog.Logger) *Manager {
 	}
 	log.Info().Msg("Config Manager - Parsing YAML Config")
 	conf := &Config{}
-	f, err := os.ReadFile("config.yaml")
+	f, err := os.ReadFile(configPath)
 	if err != nil {
 		log.Fatal().Err(err).Stack().Msg("Failed to read config file")
 	}
