@@ -1,0 +1,109 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/leaderboard/{symbol}": {
+            "get": {
+                "description": "Get the leaderboard for a given symbol.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get the leaderboard for a given symbol.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Symbol",
+                        "name": "symbol",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.UserTradeStat"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/symbols": {
+            "get": {
+                "description": "Get the list of symbols.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get the list of symbols.",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "$ref": "#/definitions/models.Symbol"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/version": {
+            "get": {
+                "description": "Get Version",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get Version",
+                "responses": {}
+            }
+        }
+    },
+    "definitions": {
+        "models.Symbol": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "imagePath": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "symbol": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.UserTradeStat": {
+            "type": "object",
+            "properties": {
+                "rank": {
+                    "type": "integer"
+                },
+                "totalVolume": {
+                    "type": "number"
+                },
+                "traderId": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

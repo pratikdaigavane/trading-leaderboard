@@ -7,7 +7,15 @@ import (
 	"time"
 )
 
-// getLeaderBoard returns a handler function that returns the leaderboard for a given symbol.
+// getLeaderBoard godoc
+// @Summary Get the leaderboard for a given symbol.
+// @Schemes
+// @Description Get the leaderboard for a given symbol.
+// @Accept json
+// @Produce json
+// @Router /leaderboard/{symbol} [get]
+// @Param symbol path string true "Symbol"
+// @Success 200 {object} []models.UserTradeStat
 func (h *handles) getLeaderBoard() gin.HandlerFunc {
 	return cache.CachePage(h.store, 1*time.Minute, func(c *gin.Context) {
 		symbol := c.Param("symbol")
@@ -22,7 +30,14 @@ func (h *handles) getLeaderBoard() gin.HandlerFunc {
 	})
 }
 
-// getSymbols returns a handler function that returns the list of symbols.
+// getSymbols godoc
+// @Summary Get the list of symbols.
+// @Schemes
+// @Description Get the list of symbols.
+// @Accept json
+// @Produce json
+// @Router /symbols [get]
+// @Success 200 {object} map[string]models.Symbol
 func (h *handles) getSymbols() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.JSON(http.StatusOK, h.symbols.GetSymbols())
