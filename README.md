@@ -25,7 +25,7 @@ ensuring accuracy and performance even under high trading activity.
 ## Architecture
 The Architecture is divided into two parts:
 ### 1. Write Flow
-![Write Flow](/docs/write-flow.png "Write FLow")
+![Write Flow](docs/write-flow.png "Write FLow")
 It is assumed that the trading data is coming from a data stream (e.g., Kafka).
 A Sorted Set in Redis is used to store and 
 maintain the leaderboard.
@@ -56,7 +56,7 @@ consumer.
 This ensures that the leaderboard has some demonstrable entries.
 
 ### 2. Read Flow
-![Read Flow](/docs/read-flow.png "Read FLow")
+![Read Flow](docs/read-flow.png "Read FLow")
 The read flow is fairly simple.
 Whe an API requests to get the leaderboard comes to the server, it's checked if the response
 can be served via in-memory local cache.
