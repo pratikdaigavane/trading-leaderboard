@@ -5,6 +5,7 @@ import (
 	"net/http"
 )
 
+// getLeaderBoard returns a handler function that returns the leaderboard for a given symbol.
 func (h *handles) getLeaderBoard() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		symbol := c.Param("symbol")
@@ -19,6 +20,7 @@ func (h *handles) getLeaderBoard() gin.HandlerFunc {
 	}
 }
 
+// getSymbols returns a handler function that returns the list of symbols.
 func (h *handles) getSymbols() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.JSON(http.StatusOK, h.symbols.GetSymbols())

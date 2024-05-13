@@ -14,6 +14,8 @@ type TradeProducer struct {
 	base *Producer
 }
 
+// Produce produces the trade events and sends them to the broker
+// To simulate the trade events, we generate random trade events with registered symbols, random traders, and  random quantities
 func (t *TradeProducer) Produce() bool {
 	symbols := t.base.symbols.GetSymbols()
 	symbolIds := make([]string, 0, len(*symbols))
@@ -30,6 +32,7 @@ func (t *TradeProducer) Produce() bool {
 		now := time.Now()
 		id := uuid.Must(uuid.NewRandom()).String()
 		select {
+		// If the context is done (shutdown signal received), stop generating the trade events
 		case <-t.base.ctx.Done():
 			t.base.logger.Info().Msg("Producer Stopped")
 			return true
@@ -49,6 +52,7 @@ func (t *TradeProducer) Produce() bool {
 	return true
 }
 
+// Start starts the trade producer in a separate goroutine and start producing the trade events
 func (t *TradeProducer) Start() {
 	go func() {
 		t.Produce()

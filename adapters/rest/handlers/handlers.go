@@ -15,6 +15,7 @@ type handles struct {
 	manager *manager.Manager
 }
 
+// SetupHandlers registers the REST API handlers with the gin engine.
 func SetupHandlers(r *gin.Engine, log *zerolog.Logger, config *config.Manager, symbols *symbols.Manager, manager *manager.Manager) {
 	h := &handles{log, config, symbols, manager}
 	r.GET("/version", h.handleVersion())

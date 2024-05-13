@@ -9,8 +9,9 @@ import (
 )
 
 type ServiceConfig struct {
-	RedisAddr string `env:"REDIS_ADDRESS" envDefault:"127.0.0.1"`
-	Version   string `env:"VERSION" envDefault:"1.0.0"`
+	RedisAddr      string `env:"REDIS_ADDRESS" envDefault:"127.0.0.1"`
+	Version        string `env:"VERSION" envDefault:"1.0.0"`
+	HttpServerAddr string `env:"HTTP_SERVER_ADDRESS" envDefault:":8080"`
 }
 
 type Config struct {
@@ -18,12 +19,16 @@ type Config struct {
 	LeaderboardDepth int                      `yaml:"leaderboardDepth" json:"leaderboardDepth"`
 }
 
+// Manager is a struct that holds the configuration for the application.
+// Manager.serviceConfig holds the configuration that is loaded from the environment variables and is used to configure the service.
+// Manager.config holds the configuration that is loaded from the config.yaml file and is the business configuration.
 type Manager struct {
 	logger        *zerolog.Logger
 	serviceConfig *ServiceConfig
 	config        *Config
 }
 
+// New creates a new Manager and loads the configuration from the environment variables and the config.yaml file.
 func New(log *zerolog.Logger) *Manager {
 	log.Info().Msg("Config Manager - Parsing Environment Variables")
 	serviceCfg := ServiceConfig{}
@@ -49,10 +54,12 @@ func New(log *zerolog.Logger) *Manager {
 	}
 }
 
+// Get returns the configuration loaded from the config.yaml file.
 func (m *Manager) Get() *Config {
 	return m.config
 }
 
+// GetServiceConfig returns the configuration loaded from the environment variables.
 func (m *Manager) GetServiceConfig() *ServiceConfig {
 	return m.serviceConfig
 }

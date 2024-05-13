@@ -6,8 +6,7 @@ import (
 	"time"
 )
 
-// StructuredLogger logs a gin HTTP request in JSON format. Allows to set the
-// logger for testing purposes.
+// StructuredLogger logs a gin HTTP request
 func StructuredLogger(logger *zerolog.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 

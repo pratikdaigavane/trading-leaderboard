@@ -18,6 +18,7 @@ func New(log *zerolog.Logger, config *config.Manager) *Manager {
 	}
 }
 
+// GetSymbols returns the symbols from the config
 func (m *Manager) GetSymbols() *map[string]models.Symbol {
 	return &m.config.Get().Symbols
 }

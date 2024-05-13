@@ -17,7 +17,6 @@ import (
 
 // App contains the "global" components that are passed around
 type App struct {
-	ctx     context.Context
 	logger  *zerolog.Logger
 	config  *config.Manager
 	storage *storage.Storage
@@ -26,6 +25,9 @@ type App struct {
 	manager *manager.Manager
 	// Channel for passing reload signals.
 	signal chan os.Signal
+	// Root context that is used to manage the application lifecycle
+	// and is passed to all the components.
+	ctx context.Context
 }
 
 var (
@@ -55,6 +57,9 @@ func main() {
 	// Wait for the interrupt or sigterm signal to gracefully shut down resources
 	// within N seconds, or do a force shutdown.
 	app.signal = make(chan os.Signal, 2)
+	// kill (no param) default send syscall.SIGTERM
+	// kill -2 is syscall.SIGINT
+	// kill -9 is syscall. SIGKILL but can't be caught, so don't need to add it
 	signal.Notify(app.signal, os.Interrupt, syscall.SIGTERM)
 	for {
 		sig := <-app.signal

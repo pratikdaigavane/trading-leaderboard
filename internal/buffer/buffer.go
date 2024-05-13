@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-// Buffer is used to store the buffer data of trade volume and is pushed to the database only when the
+// Buffer is used to store the buffer data of trades and is pushed to the database only when the
 // buffer is full or after certain time interval
 type Buffer struct {
 	store       []*models.Trade
@@ -77,6 +77,7 @@ func (b *Buffer) startFlushTicker() {
 	defer t.Stop()
 	for {
 		select {
+		// If the context is done (shutdown signal received), flush the buffer and return
 		case <-b.ctx.Done():
 			b.logger.Info().Str("name", b.name).Msg("Shutting down the buffer ticker")
 			// Take the lock and flush so that the buffer is flushed before shutting down

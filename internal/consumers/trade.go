@@ -6,6 +6,7 @@ type TradeConsumer struct {
 	base *Consumer
 }
 
+// Consume consumes the trade event and adds the trade to the database
 func (t *TradeConsumer) Consume(payload interface{}) bool {
 	trade := payload.(models.Trade)
 	t.base.logger.Info().Interface("trade", trade).Msg("Trade Consumed")
