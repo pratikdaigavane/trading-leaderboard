@@ -1,13 +1,15 @@
 package handlers
 
 import (
+	"github.com/gin-contrib/cache"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"time"
 )
 
 // getLeaderBoard returns a handler function that returns the leaderboard for a given symbol.
 func (h *handles) getLeaderBoard() gin.HandlerFunc {
-	return func(c *gin.Context) {
+	return cache.CachePage(h.store, 1*time.Minute, func(c *gin.Context) {
 		symbol := c.Param("symbol")
 		h.logger.Info().Str("symbol", symbol).Msg("Getting leaderboard")
 		leaderboard, err := h.manager.GetLeaderboard(symbol, h.config.Get().LeaderboardDepth)
@@ -17,7 +19,7 @@ func (h *handles) getLeaderBoard() gin.HandlerFunc {
 			return
 		}
 		c.JSON(http.StatusOK, leaderboard)
-	}
+	})
 }
 
 // getSymbols returns a handler function that returns the list of symbols.
