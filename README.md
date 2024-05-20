@@ -1,7 +1,9 @@
 # Coding Challenge - Trading Leaderboard
 ## Problem Statement
 Write an eﬀicient and scalable program that dynamically updates the leader-board with the latest ranking every minute, 
-ensuring accuracy and performance even under high trading activity.Read the full problem statement here: [PROBLEM.md](PROBLEM.md)
+ensuring accuracy and performance even under high trading activity.  
+
+Read the full problem statement here: [PROBLEM.md](PROBLEM.md)
 
 <p align=center>
     <img src="docs/screenshot.png"  width="700">
