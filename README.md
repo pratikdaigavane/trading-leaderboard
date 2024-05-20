@@ -9,8 +9,6 @@ ensuring accuracy and performance even under high trading activity.Read the full
 
 ## Tech Stack
 
-**This project is also hosted and can be viewed at [leaderboard.pratikd.in](https://leaderboard.pratikd.in)**
-
 ### Backend
 - Programming Language: GoLang
 - Datastore: Redis
@@ -105,5 +103,4 @@ make test
 ```
 ## API Documentation
 The API documentation is hosted via Swagger
-Once the server is up, visit [http://127.0.0.1:8080/swagger/index.html](http://127.0.0.1:8080/swagger/index.html)  
-Additionally, the documentation can also be viewed by visiting [https://api-leaderboard.pratikd.in/swagger/index.html](https://api-leaderboard.pratikd.in/swagger/index.html)
+Once the server is up, visit [http://127.0.0.1:8080/swagger/index.html](http://127.0.0.1:8080/swagger/index.html)
