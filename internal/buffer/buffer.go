@@ -17,14 +17,12 @@ type Buffer[T any] struct {
 	lock        sync.Mutex
 	funcOnFlush func(data []*T) error
 	maxDuration time.Duration
-	ctx         context.Context
 	logger      *zerolog.Logger
 	name        string
 }
 
 func New[T any](ctx context.Context, logger *zerolog.Logger, name string, maxCapacity int64, maxDuration time.Duration, funcOnFlush func(data []*T) error) *Buffer[T] {
 	buf := &Buffer[T]{
-		ctx:         ctx,
 		store:       []*T{},
 		name:        name,
 		lastFlushed: time.Now(),
@@ -33,7 +31,7 @@ func New[T any](ctx context.Context, logger *zerolog.Logger, name string, maxCap
 		maxDuration: maxDuration,
 		logger:      logger,
 	}
-	go buf.startFlushTicker()
+	go buf.startFlushTicker(ctx)
 	return buf
 }
 
@@ -69,13 +67,13 @@ func (b *Buffer[T]) flush() error {
 }
 
 // startFlushTicker starts a ticker to flush the buffer after certain time interval
-func (b *Buffer[T]) startFlushTicker() {
+func (b *Buffer[T]) startFlushTicker(ctx context.Context) {
 	t := time.NewTicker(1 * time.Second)
 	defer t.Stop()
 	for {
 		select {
 		// If the context is done (shutdown signal received), flush the buffer and return
-		case <-b.ctx.Done():
+		case <-ctx.Done():
 			b.logger.Info().Str("name", b.name).Msg("Shutting down the buffer ticker")
 			// Take the lock and flush so that the buffer is flushed before shutting down
 			func() {
