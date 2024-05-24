@@ -3,30 +3,29 @@ package buffer
 import (
 	"context"
 	"github.com/rs/zerolog"
-	"leaderboard/models"
 	"sync"
 	"time"
 )
 
-// Buffer is used to store the buffer data of trades and is pushed to the database only when the
-// buffer is full or after certain time interval
-type Buffer struct {
-	store       []*models.Trade
+// Buffer is used to store the buffer data of any type and funcOnFlush is called when the
+// buffer is full or after a certain time interval
+type Buffer[T any] struct {
+	store       []*T
 	CurrSize    int64
 	maxSize     int64
 	lastFlushed time.Time
 	lock        sync.Mutex
-	funcOnFlush func(trade []*models.Trade) error
+	funcOnFlush func(data []*T) error
 	maxDuration time.Duration
 	ctx         context.Context
 	logger      *zerolog.Logger
 	name        string
 }
 
-func NewBuffer(ctx context.Context, logger *zerolog.Logger, name string, maxCapacity int64, maxDuration time.Duration, funcOnFlush func(trade []*models.Trade) error) *Buffer {
-	buf := &Buffer{
+func New[T interface{}](ctx context.Context, logger *zerolog.Logger, name string, maxCapacity int64, maxDuration time.Duration, funcOnFlush func(data []*T) error) *Buffer[T] {
+	buf := &Buffer[T]{
 		ctx:         ctx,
-		store:       []*models.Trade{},
+		store:       []*T{},
 		name:        name,
 		lastFlushed: time.Now(),
 		funcOnFlush: funcOnFlush,
@@ -39,10 +38,10 @@ func NewBuffer(ctx context.Context, logger *zerolog.Logger, name string, maxCapa
 }
 
 // Add adds the value to the buffer and flushes the buffer if the buffer is full or after certain time interval
-func (b *Buffer) Add(trade *models.Trade) error {
+func (b *Buffer[T]) Add(entry *T) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
-	b.store = append(b.store, trade)
+	b.store = append(b.store, entry)
 	b.CurrSize++
 	if b.CurrSize >= b.maxSize || time.Since(b.lastFlushed) >= b.maxDuration {
 		err := b.flush()
@@ -54,7 +53,7 @@ func (b *Buffer) Add(trade *models.Trade) error {
 }
 
 // flush flushes the buffer, calls the callback and resets the buffer
-func (b *Buffer) flush() error {
+func (b *Buffer[T]) flush() error {
 	b.logger.Info().Str("name", b.name).Interface("store", b.store).Msg("Flushing buffer")
 	if len(b.store) > 0 {
 		err := b.funcOnFlush(b.store)
@@ -64,13 +63,13 @@ func (b *Buffer) flush() error {
 		}
 	}
 	b.CurrSize = 0
-	b.store = []*models.Trade{}
+	b.store = []*T{}
 	b.lastFlushed = time.Now()
 	return nil
 }
 
 // startFlushTicker starts a ticker to flush the buffer after certain time interval
-func (b *Buffer) startFlushTicker() {
+func (b *Buffer[T]) startFlushTicker() {
 	t := time.NewTicker(1 * time.Second)
 	defer t.Stop()
 	for {
@@ -79,9 +78,15 @@ func (b *Buffer) startFlushTicker() {
 		case <-b.ctx.Done():
 			b.logger.Info().Str("name", b.name).Msg("Shutting down the buffer ticker")
 			// Take the lock and flush so that the buffer is flushed before shutting down
-			b.lock.Lock()
-			b.flush()
-			b.lock.Unlock()
+			func() {
+				b.lock.Lock()
+				defer b.lock.Unlock()
+				err := b.flush()
+				if err != nil {
+					b.logger.Error().Str("name", b.name).Err(err).Msg("Failed to flush buffer")
+					return
+				}
+			}()
 			return
 		case <-t.C:
 			b.logger.Debug().
@@ -90,11 +95,17 @@ func (b *Buffer) startFlushTicker() {
 				Time("lastFlushed", b.lastFlushed).
 				Interface("store", b.store).
 				Msg("Checking buffer if buffer is full")
-			b.lock.Lock()
-			if time.Since(b.lastFlushed) >= b.maxDuration && b.CurrSize > 0 {
-				b.flush()
-			}
-			b.lock.Unlock()
+			func() {
+				b.lock.Lock()
+				defer b.lock.Unlock()
+				if time.Since(b.lastFlushed) >= b.maxDuration && b.CurrSize > 0 {
+					err := b.flush()
+					if err != nil {
+						b.logger.Error().Str("name", b.name).Err(err).Msg("Failed to flush buffer")
+						return
+					}
+				}
+			}()
 		}
 	}
 }

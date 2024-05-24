@@ -18,7 +18,7 @@ import (
 func TestBufferAdd(t *testing.T) {
 	t.Parallel()
 	name := "bitcoin"
-	buf := newFakeBuffer("buff-1", t)
+	buf := newFakeTradesBuffer("buff-1", t)
 	t.Run("Add", func(t *testing.T) {
 		err := buf.Add(getRandomTrade(name))
 		assert.Nil(t, err)
@@ -28,7 +28,7 @@ func TestBufferAdd(t *testing.T) {
 func TestBufferAddFullFlush(t *testing.T) {
 	t.Parallel()
 	name := "bitcoin"
-	buf := newFakeBuffer("buff-2", t)
+	buf := newFakeTradesBuffer("buff-2", t)
 	t.Run("Add Buffer Full", func(t *testing.T) {
 		for i := 0; i < 10; i++ {
 			err := buf.Add(getRandomTrade(name))
@@ -41,7 +41,7 @@ func TestBufferAddFullFlush(t *testing.T) {
 func TestBufferAddTimeoutFlush(t *testing.T) {
 	t.Parallel()
 	name := "bitcoin"
-	buf := newFakeBuffer("buff-3", t)
+	buf := newFakeTradesBuffer("buff-3", t)
 	t.Run("Add Timeout Flush", func(t *testing.T) {
 		err := buf.Add(getRandomTrade(name))
 		assert.Nil(t, err)
@@ -50,13 +50,13 @@ func TestBufferAddTimeoutFlush(t *testing.T) {
 	})
 }
 
-func newFakeBuffer(name string, t *testing.T) *Buffer {
+func newFakeTradesBuffer(name string, t *testing.T) *Buffer[models.Trade] {
 	ctx, cancel := context.WithCancel(context.Background())
 	funcOnFlush := func(trade []*models.Trade) error {
 		return nil
 	}
 	logger := log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
-	buf := NewBuffer(ctx, &logger, name, 10, 5*time.Second, funcOnFlush)
+	buf := New(ctx, &logger, name, 10, 5*time.Second, funcOnFlush)
 	t.Cleanup(func() {
 		cancel()
 	})

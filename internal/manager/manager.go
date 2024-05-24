@@ -13,7 +13,7 @@ import (
 // Manager is used to manage the leaderboard and is the core component of the leaderboard system
 type Manager struct {
 	ctx     context.Context
-	buffer  map[string]*buffer.Buffer
+	buffer  map[string]*buffer.Buffer[models.Trade]
 	logger  *zerolog.Logger
 	cancel  context.CancelFunc
 	storage *storage.Storage
@@ -23,11 +23,11 @@ type Manager struct {
 func New(ctx context.Context, logger *zerolog.Logger, symbols *symbols.Manager, storage *storage.Storage) *Manager {
 	// Create a new context and cancel function to stop the buffer when the context is done
 	ctx, cancel := context.WithCancel(ctx)
-	buf := make(map[string]*buffer.Buffer)
+	buf := make(map[string]*buffer.Buffer[models.Trade])
 	symbolsList := symbols.GetSymbols()
 	for symbol := range *symbolsList {
 		logger.Info().Str("symbol", symbol).Msg("Creating Buffer")
-		buf[symbol] = buffer.NewBuffer(ctx, logger, symbol, 10, 5*time.Second, storage.Operations.BatchAdd)
+		buf[symbol] = buffer.New(ctx, logger, symbol, 10, 5*time.Second, storage.Operations.BatchAdd)
 	}
 	return &Manager{ctx: ctx, buffer: buf, logger: logger, cancel: cancel, storage: storage}
 }
