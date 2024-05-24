@@ -22,7 +22,7 @@ type Buffer[T any] struct {
 	name        string
 }
 
-func New[T interface{}](ctx context.Context, logger *zerolog.Logger, name string, maxCapacity int64, maxDuration time.Duration, funcOnFlush func(data []*T) error) *Buffer[T] {
+func New[T any](ctx context.Context, logger *zerolog.Logger, name string, maxCapacity int64, maxDuration time.Duration, funcOnFlush func(data []*T) error) *Buffer[T] {
 	buf := &Buffer[T]{
 		ctx:         ctx,
 		store:       []*T{},
