@@ -4,7 +4,6 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/rs/zerolog/pkgerrors"
-	"os"
 )
 
 // initLogger initializes the logger to log a human-friendly, colorized output.

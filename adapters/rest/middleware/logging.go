@@ -44,7 +44,7 @@ func StructuredLogger(logger *zerolog.Logger) gin.HandlerFunc {
 			logEvent = logger.Info()
 		}
 
-		logEvent.Str("client_id", param.ClientIP).
+		logEvent.Str("client_ip", param.ClientIP).
 			Str("method", param.Method).
 			Int("status_code", param.StatusCode).
 			Str("path", param.Path).
