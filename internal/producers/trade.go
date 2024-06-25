@@ -26,7 +26,7 @@ func (t *TradeProducer) Produce() bool {
 	for i := 0; i < 100; i++ {
 		traders = append(traders, petname.Generate(2, "-"))
 	}
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 10; i++ {
 		symbolIndex := rand.N(len(symbolIds))
 		quantity, _ := strconv.ParseFloat(fmt.Sprintf("%.2f", rand.Float64()*1000+0.1), 64)
 		now := time.Now()
