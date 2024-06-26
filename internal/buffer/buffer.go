@@ -7,8 +7,9 @@ import (
 	"time"
 )
 
-// Buffer is used to store the buffer data of any type and funcOnFlush is called when the
-// buffer is full or after a certain time interval
+// Buffer is used to store the buffer data of any type.
+// The funcOnFlush function is called when the
+// buffer is full or after a certain time interval.
 type Buffer[T any] struct {
 	store       []*T
 	CurrSize    int64

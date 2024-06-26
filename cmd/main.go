@@ -57,16 +57,14 @@ func main() {
 	// Wait for the interrupt or sigterm signal to gracefully shut down resources
 	// within N seconds, or do a force shutdown.
 	app.signal = make(chan os.Signal, 2)
-	// kill (no param) default send syscall.SIGTERM
+	// kill (no param) default sends syscall.SIGTERM
 	// kill -2 is syscall.SIGINT
 	// kill -9 is syscall. SIGKILL but can't be caught, so don't need to add it
 	signal.Notify(app.signal, os.Interrupt, syscall.SIGTERM)
-	for {
-		sig := <-app.signal
-		app.logger.Info().Str("signal", sig.String()).Msg("Received Signal to Shutdown")
-		app.events.shutdown()
-		app.manager.Shutdown()
-		server.Shutdown(app.ctx)
-		return
-	}
+	sig := <-app.signal
+	app.logger.Info().Str("signal", sig.String()).Msg("Received Signal to Shutdown")
+	app.events.shutdown()
+	app.manager.Shutdown()
+	server.Shutdown(app.ctx)
+	return
 }
